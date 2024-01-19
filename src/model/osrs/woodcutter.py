@@ -8,7 +8,7 @@ from model.runelite_bot import BotStatus
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.api.status_socket import StatusSocket
 from utilities.geometry import RuneLiteObject
-
+import pytweening
 
 class OSRSWoodcutter(OSRSBot):
     def __init__(self):
@@ -60,20 +60,17 @@ class OSRSWoodcutter(OSRSBot):
             if rd.random_chance(probability=0.05) and self.take_breaks:
                 self.take_break(max_seconds=30, fancy=True)
 
-            # 2% chance to drop logs early
-            if rd.random_chance(probability=0.02):
-                self.__drop_logs(api_s)
-
-            # If inventory is full, drop logs
+            # If inventory is full, bank logs
             if api_s.get_is_inv_full():
-                self.__drop_logs(api_s)
+                self._bank(api_s)
+                continue
 
             # If our mouse isn't hovering over a tree, and we can't find another tree...
             if not self.mouseover_text(contains="Chop", color=clr.OFF_WHITE) and not self.__move_mouse_to_nearest_tree():
                 failed_searches += 1
                 if failed_searches % 10 == 0:
                     self.log_msg("Searching for trees...")
-                if failed_searches > 60:
+                if failed_searches > 130:
                     # If we've been searching for a whole minute...
                     self.__logout("No tagged trees found. Logging out.")
                 time.sleep(1)
@@ -131,13 +128,42 @@ class OSRSWoodcutter(OSRSBot):
             self.mouse.move_to(tree.random_point())
         return True
 
-    def __drop_logs(self, api_s: StatusSocket):
-        """
-        Private function for dropping logs. This code is used in multiple places, so it's been abstracted.
-        Since we made the `api` and `logs` variables assigned to `self`, we can access them from this function.
-        """
-        slots = api_s.get_inv_item_indices(ids.logs)
-        self.drop(slots)
-        self.logs += len(slots)
+    def _bank(self, api_s: StatusSocket):
+        banks = self.get_all_tagged_in_rect(self.win.game_view, clr.YELLOW)
+        if not banks:
+            self.log_msg("No banks found!")
+            return False
+        banks = sorted(banks, key=RuneLiteObject.distance_from_rect_center)
+        self.mouse.move_to(banks[0].random_point(), mouseSpeed="slow", knotsCount=2)
+        self.log_msg("Found Bank!")
+        time.sleep(2)
+        self.mouse.click()
+        self.log_msg("Should be moving to bank")
+        time.sleep(3)
+        self._deposit_inv(api_s)
+        self._close_bank()
+        return True
+
+    def _deposit_inv(self, api_s: StatusSocket):
+        for i, slot in enumerate(self.win.inventory_slots):
+            p = slot.random_point()
+            self.mouse.move_to(
+                (p[0], p[1]),
+                mouseSpeed="fastest",
+                knotsCount=1,
+                offsetBoundaryY=40,
+                offsetBoundaryX=40,
+                tween=pytweening.easeInOutQuad,
+            )
+            self.mouse.click()
+            break
+        self.logs += 28
         self.log_msg(f"Logs cut: ~{self.logs}")
         time.sleep(1)
+    
+    def _close_bank(self):
+         '''
+         Closes the bank interface.
+         '''
+         self.log_msg("Closing bank...")
+         self.mouse.key_press('escape')

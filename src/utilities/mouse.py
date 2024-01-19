@@ -15,6 +15,14 @@ from utilities.random_util import truncated_normal_sample
 class Mouse:
     click_delay = True
 
+    def key_press(self, key):
+        pag.keyDown(key)
+        LOWER_BOUND_CLICK = 0.03  # Milliseconds
+        UPPER_BOUND_CLICK = 0.2  # Milliseconds
+        AVERAGE_CLICK = 0.06  # Milliseconds
+        time.sleep(truncated_normal_sample(LOWER_BOUND_CLICK, UPPER_BOUND_CLICK, AVERAGE_CLICK))
+        pag.keyUp(key)
+
     def move_to(self, destination: tuple, **kwargs):
         """
         Use Bezier curve to simulate human-like mouse movements.
