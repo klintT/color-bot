@@ -1,0 +1,4 @@
+In the morg http client you can get the world position. For traveling larger distances, I could find the world position of where i want to go and my current world position. From there I could move a random number of tiles in a direction that I want to go.
+I'm not sure how that would work for cross map travel but it would work for things like blood runes without having to setup weird trails of marked tiles
+
+_locate_spells is in the window object
