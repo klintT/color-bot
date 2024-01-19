@@ -1,32 +1,22 @@
 import pyautogui as pag
 import time
+import item_ids
 
-from model.runelite_bot import RuneLiteBot, RuneLiteWindow
+from model.runelite_bot import RuneLiteWindow
 
-def highAlch(self, item: str):
-    # Remove this win
+def highAlch(self, item: str, count: int):
     win: RuneLiteWindow = None
+    self.log_msg(f"High Alching Item: {item}...")
+    self.mouse.move_to(self.win.cp_tab(6), mouseSpeed='medium')
+    pag.click()
+    time.sleep(0.5)
 
-    # win.cp_tabs
-    # self.log_msg(f"High Alching Item: {item}...")
-    # self.mouse.move_to(self.win.cp_tab(6), mouseSpeed='medium')
-    # pag.click()
-    # time.sleep(0.5)
+    for i in range(0, count):
+        self.mouse.move_to(self.win.spellbook_normal(36), mouseSpeed='medium')
+        pag.click()
+        time.sleep(.5)
 
-    # Figure out how to find the spell icon. This doesn't work
-    # self.mouse.move_to(self.win.teleport_menu_search(), mouseSpeed='medium')
-    # pag.click()
-    # time.sleep(1)
-    # result = self.win.teleport_menu_search_result()
-    # no_result_rgb = pag.pixel(result.x, result.y)
-    # pag.typewrite(location, interval=0.05)
+        #Find item in inv
+        id = item_ids[]
 
-    # time.sleep(1.5)
-    # new_result = self.win.teleport_menu_search_result()
-    # if no_result_rgb == pag.pixel(new_result.x, new_result.y):
-    #     self.log_msg(f"No results found for {location}.")
-    #     return False
-    # self.mouse.move_to(new_result, mouseSpeed='medium')
-    # pag.click()
-    # self.log_msg("Teleport successful.")
-    # return True
+    return True
